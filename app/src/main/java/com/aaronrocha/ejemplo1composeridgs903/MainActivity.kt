@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Card
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,17 +17,18 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FloatingActionButtonDefaults.elevation
-import androidx.compose.material3.FloatingActionButtonDefaults.shape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalOf
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,7 +36,7 @@ import androidx.compose.ui.unit.dp
 
 private val Tarjetas : List<PersonajeTarjeta> = listOf(
     PersonajeTarjeta("Goku","El protagonista de la serie, conocido por su gran poder y personalidad amigable."),
-    PersonajeTarjeta("Vegueta", "Príncipe de los Saiyans, inicialmente un villano, pero luego se une a los Z Fighters."),
+    PersonajeTarjeta("Vegeta", "Príncipe de los Saiyans, inicialmente un villano, pero luego se une a los Z Fighters."),
     PersonajeTarjeta("Broly","Broly es un Saiyajin que posee un poder gigantesco e incontrolable, el cual se manifiesta en toda su magnitud cuando se convierte en el Super Saiyajin Legendario."),
     PersonajeTarjeta("Gohan","Son Gohanda en su tiempo en España, o simplemente Gohan en Hispanoamérica, es uno de los personajes principales de los arcos argumentales de Dragon Ball Z, Dragon Ball Super y Dragon Ball GT."),
     PersonajeTarjeta("Freezer","Freezer es el tirano espacial y el principal antagonista de la saga de Freezer."),
@@ -61,21 +63,19 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}@Composable
+}
+@Composable
 fun Tarjeta(personajes: List<PersonajeTarjeta>){
     LazyColumn {
         items(personajes) { personaje ->
             MyPersonajes(personaje)
         }
-
-
-
     }
 }
 
 @Composable
-fun Personaje(name: String, color: Color, style: androidx.compose.ui.text.TextStyle){
-    Text(text = name)
+fun Personaje(name: String, color: Color, style: androidx.compose.ui.text.TextStyle,lines:Int = Int.MAX_VALUE){
+    Text(text = name, color = color, style = style,maxLines = lines)
 }
 @Composable
 fun MyPersonajes(personajes: PersonajeTarjeta) {
@@ -89,7 +89,7 @@ fun MyPersonajes(personajes: PersonajeTarjeta) {
     ) {
 
         Row {
-            ImageHeroe()
+            ImageHeroe(personajes.title)
             Personajes(personajes)
         }
     }
@@ -97,7 +97,12 @@ fun MyPersonajes(personajes: PersonajeTarjeta) {
 
 @Composable
 fun Personajes(personaje: PersonajeTarjeta) {
-    Column {
+    var expanded by remember { mutableStateOf(false) }
+    Column (
+        modifier = Modifier
+            .padding(start = 8.dp)
+            .clickable { expanded = !expanded }
+    ){
         Personaje(personaje.title,
             MaterialTheme.colorScheme.primary,
             MaterialTheme.typography.headlineLarge)
@@ -105,18 +110,23 @@ fun Personajes(personaje: PersonajeTarjeta) {
         Personaje(personaje.body,
             MaterialTheme.colorScheme.onBackground,
             MaterialTheme.typography.bodyLarge)
+        if(expanded) Int.MAX_VALUE else 1
     }
 }
 
 
 @Composable
-fun ImageHeroe(){
-    Image(painter = painterResource(id = R.drawable.broly_super_saiyajin_legendario_1), contentDescription = "Goku",
+fun ImageHeroe(imageName : String){
+    val contex = LocalContext.current
+    val imageResId = remember (imageName){
+        contex.resources.getIdentifier(imageName.lowercase(),"drawable",contex.packageName)
+    }
+    Image(painter = painterResource(id = imageResId), contentDescription = "Goku",
         modifier = Modifier
             .padding(8.dp)
             .size(100.dp)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.tertiary))
+            .background(MaterialTheme.colorScheme.secondary))
 }
 
 @Preview
